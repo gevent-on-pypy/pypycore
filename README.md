@@ -1,4 +1,4 @@
 pypycore
 ========
 
-gevent.core implemented as cffi module, might be used with pypy
+gevent.core implemented as cffi module, might be used with pypy (someday)
