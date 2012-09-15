@@ -448,6 +448,22 @@ class loop(object):
         return '<%s at 0x%x %s>' % (self.__class__.__name__, id(self), self._format())
 
     @property
+    def ptr(self):
+        return self._ptr
+
+    @property
+    def WatcherType(self):
+        return watcher
+
+    @property
+    def MAXPRI(self):
+        return libev.EV_MAXPRI
+
+    @property
+    def MINPRI(self):
+        return libev.EV_MINPRI
+
+    @property
     def default(self):
         return True if libev.ev_is_default_loop(self._ptr) else False
 
