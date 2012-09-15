@@ -475,6 +475,9 @@ class loop(object):
     def pendingcnt(self):
         return libev.ev_pending_count(self._ptr)
 
+    def io(self, fd, events, ref=True, priority=None):
+        return io(self, fd, events, ref, priority)
+
     def timer(self, after, repeat=0.0, ref=True, priority=None):
         return timer(self, after, repeat, ref, priority)
 
