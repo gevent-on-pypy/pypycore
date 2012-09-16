@@ -862,7 +862,26 @@ class callback(watcher):
         return self.callback is not None
 
 
-def set_syserr_cb(_):  # XXX
-    pass
+def _syserr_cb(msg):
+    try:
+        __SYSERR_CALLBACK(msg, ffi.errno)
+    except:
+        set_syserr_cb(None)
+        print_exc = getattr(traceback, 'print_exc', None)
+        if print_exc is not None:
+            print_exc()
+
+_syserr_cb._cb = ffi.callback("void(*)(char *msg)", _syserr_cb)
+
+def set_syserr_cb(callback):
+    global __SYSERR_CALLBACK
+    if callback is None:
+        libev.ev_set_syserr_cb(ffi.NULL)
+        __SYSERR_CALLBACK = None
+    elif callable(callback):
+        libev.ev_set_syserr_cb(_syserr_cb._cb)
+        __SYSERR_CALLBACK = callback
+    else:
+        raise TypeError('Expected callable or None, got %r' % (callback, ))
 
 __SYSERR_CALLBACK = None
