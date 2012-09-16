@@ -557,7 +557,21 @@ class watcher(object):
             libev.ev_set_priority(self._watcher, priority)
 
     def _run_callback(self, loop, c_watcher, revents):
-        self.callback(*self.args)
+        try:
+            self.callback(*self.args)
+        except:
+            try:
+                self.loop.handle_error(self, *sys.exc_info())
+            finally:
+                if revents & (libev.EV_READ|libev.EV_WRITE):
+                    # /* io watcher: not stopping it may cause the failing callback to be called repeatedly */
+                    try:
+                        self.stop()
+                    except:
+                        self.loop.handle_error(self, *sys.exc_info())
+                    return
+
+
         if not self.active:
             self.stop()
 
