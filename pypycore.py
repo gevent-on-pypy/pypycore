@@ -127,35 +127,13 @@ void ev_set_syserr_cb(void *);
 
 int ev_priority(void*);
 void ev_set_priority(void*, int);
+
 int ev_is_pending(void*);
 int ev_is_active(void*);
-
 void ev_io_init(struct ev_io*, void* callback, int fd, int events);
 void ev_io_start(struct ev_loop*, struct ev_io*);
 void ev_io_stop(struct ev_loop*, struct ev_io*);
 void ev_feed_event(struct ev_loop*, void*, int);
-
-
-
-
-
-
-
-
-
-
-
-
-
-void ev_sleep (ev_tstamp delay); /* sleep for a while */
-
-
-struct ev_loop *ev_default_loop (unsigned int flags);
-int ev_is_default_loop (struct ev_loop *);
-
-unsigned int ev_iteration(struct ev_loop*);
-unsigned int ev_depth(struct ev_loop*);
-unsigned int ev_backend(struct ev_loop*);
 
 void ev_timer_init(struct ev_timer*, void* callback, double, double);
 void ev_timer_start(struct ev_loop*, struct ev_timer*);
@@ -184,18 +162,40 @@ void ev_async_stop(struct ev_loop*, struct ev_async*);
 void ev_async_send(struct ev_loop*, struct ev_async*);
 int ev_async_pending(struct ev_async*);
 
+void ev_child_init(struct ev_child*, void* callback, int, int);
+void ev_child_start(struct ev_loop*, struct ev_child*);
+void ev_child_stop(struct ev_loop*, struct ev_child*);
+
+void ev_stat_init(struct ev_stat*, void* callback, char*, double);
+void ev_stat_start(struct ev_loop*, struct ev_stat*);
+void ev_stat_stop(struct ev_loop*, struct ev_stat*);
+
+struct ev_loop *ev_default_loop (unsigned int flags);
+struct ev_loop* ev_loop_new(unsigned int flags);
+void ev_loop_destroy(struct ev_loop*);
+void ev_loop_fork(struct ev_loop*);
+int ev_is_default_loop (struct ev_loop *);
+unsigned int ev_iteration(struct ev_loop*);
+unsigned int ev_depth(struct ev_loop*);
+unsigned int ev_backend(struct ev_loop*);
+void ev_verify(struct ev_loop*);
+void ev_run(struct ev_loop*, int flags);
+
+
 ev_tstamp ev_now (struct ev_loop *);
-
 void ev_now_update (struct ev_loop *); /* update event loop time */
-
 
 void ev_ref(struct ev_loop*);
 void ev_unref(struct ev_loop*);
 void ev_break(struct ev_loop*, int);
 unsigned int ev_pending_count(struct ev_loop*);
 
-void ev_run(struct ev_loop*, int flags);
 
+/*
+    ev_loop* gevent_ev_default_loop(unsigned int flags)
+    void gevent_install_sigchld_handler()
+ */
+void ev_sleep (ev_tstamp delay); /* sleep for a while */
 """)
 
 libev = C = ffi.verify("""   // passed to the real C compiler
