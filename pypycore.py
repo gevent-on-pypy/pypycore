@@ -417,6 +417,22 @@ class loop(object):
             libev.ev_loop_destroy(self._ptr)
             self._ptr = ffi.NULL
 
+    @property
+    def ptr(self):
+        return self._ptr
+
+    @property
+    def WatcherType(self):
+        return watcher
+
+    @property
+    def MAXPRI(self):
+        return libev.EV_MAXPRI
+
+    @property
+    def MINPRI(self):
+        return libev.EV_MINPRI
+
     def _handle_syserr(self, message, errno):
         self.handle_error(None, SystemError, SystemError(message + ': ' + os.strerror(errno)), None)
 
@@ -470,22 +486,6 @@ class loop(object):
         return '<%s at 0x%x %s>' % (self.__class__.__name__, id(self), self._format())
 
     @property
-    def ptr(self):
-        return self._ptr
-
-    @property
-    def WatcherType(self):
-        return watcher
-
-    @property
-    def MAXPRI(self):
-        return libev.EV_MAXPRI
-
-    @property
-    def MINPRI(self):
-        return libev.EV_MINPRI
-
-    @property
     def default(self):
         return True if libev.ev_is_default_loop(self._ptr) else False
 
@@ -534,6 +534,19 @@ class loop(object):
     def async(self, ref=True, priority=None):
         return async(self, ref, priority)
 
+# #if EV_CHILD_ENABLE
+
+#     def child(self, int pid, bint trace=0, ref=True):
+#         return child(self, pid, trace, ref)
+
+#     def install_sigchld(self):
+#         libev.gevent_install_sigchld_handler()
+
+# #endif
+
+#     def stat(self, bytes path, float interval=0.0, ref=True, priority=None):
+#         return stat(self, path, interval, ref, priority)
+
     def callback(self, priority=None):
         return callback(self, priority)
 
@@ -557,6 +570,24 @@ class loop(object):
         fd = self._ptr.backend_fd
         if fd >= 0:
             return fd
+
+#     LOOP_PROPERTY(activecnt)
+
+# #if EV_USE_SIGNALFD
+#     LOOP_PROPERTY(sigfd)
+# #endif
+
+#     property origflags:
+
+#         def __get__(self):
+#             return _flags_to_list(self._ptr.origflags)
+
+#     property origflags_int:
+
+#         def __get__(self):
+#             return self._ptr.origflags
+
+# #endif
 
 
 class watcher(object):
