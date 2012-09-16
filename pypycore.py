@@ -791,15 +791,15 @@ class timer(watcher):
     def at(self):
         return self._watcher.at
 
-    def again(self, callback, *args):
-        update = True
+    def again(self, callback, *args, **kw):
+        update = kw.get("update", True)
         self.callback = callback
         self.args = args
-        # LIBEV_UNREF
+        self._libev_unref()
         if update:
             libev.ev_now_update(self.loop._ptr)
         libev.ev_timer_again(self.loop._ptr, self._watcher)
-        # PYTHON_INCREF
+        self._python_incref()
 
 
 class signal(watcher):
