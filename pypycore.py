@@ -521,6 +521,16 @@ class loop(object):
         result.start(func, *args)
         return result
 
+    def _format(self):
+        msg = self.backend
+        if self.default:
+            msg += ' default'
+        msg += ' pending=%s' % self.pendingcnt
+# #ifdef LIBEV_EMBED
+#         msg += self._format_details()
+# #endif
+        return msg
+
     def fileno(self):
         fd = self._ptr.backend_fd
         if fd >= 0:
