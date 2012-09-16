@@ -358,6 +358,7 @@ def before_block(evloop, _, revents):
 
 
 class loop(object):
+    error_handler = None
     def __init__(self, flags=None, default=True, ptr=0):
         sys.stderr.write("*** using ev loop\n")
         self._signal_checker = ffi.new("struct ev_prepare *")
@@ -394,6 +395,27 @@ class loop(object):
                     raise SystemError("ev_loop_new(%s) failed" % (c_flags, ))
             if default or __SYSERR_CALLBACK is None:
                 set_syserr_cb(self._handle_syserr)
+
+    def _stop_signal_checker(self):
+        if libev.ev_is_active(self._signal_checker):
+            libev.ev_ref(self._ptr)
+            libev.ev_prepare_stop(self._ptr, self._signal_checker)
+# #ifdef _WIN32
+#         if libev.ev_is_active(&self._periodic_signal_checker):
+#             libev.ev_ref(self._ptr)
+#             libev.ev_timer_stop(self._ptr, &self._periodic_signal_checker)
+# #endif
+
+    def destroy(self):
+        global _default_loop_destroyed
+        if self._ptr:
+            self._stop_signal_checker()
+            if __SYSERR_CALLBACK == self._handle_syserr:
+                set_syserr_cb(None)
+            if libev.ev_is_default_loop(self._ptr):
+                _default_loop_destroyed = True
+            libev.ev_loop_destroy(self._ptr)
+            self._ptr = ffi.NULL
 
     def _handle_syserr(self, message, errno):
         self.handle_error(None, SystemError, SystemError(message + ': ' + os.strerror(errno)), None)
