@@ -624,8 +624,9 @@ class watcher(object):
                         self.loop.handle_error(self, *sys.exc_info())
                     return
 
-
-        if not self.active:
+        # callbacks' self.active differs from ev_is_active(...) at
+        # this point. don't use it!
+        if not libev.ev_is_active(c_watcher):
             self.stop()
 
     def _libev_unref(self):
