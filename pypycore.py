@@ -393,7 +393,7 @@ class loop(object):
                 self._ptr = libev.ev_loop_new(c_flags)
                 if not self._ptr:
                     raise SystemError("ev_loop_new(%s) failed" % (c_flags, ))
-            if default or __SYSERR_CALLBACK is None:
+            if default or globals()["__SYSERR_CALLBACK"] is None:
                 set_syserr_cb(self._handle_syserr)
 
     def _stop_signal_checker(self):
@@ -410,7 +410,7 @@ class loop(object):
         global _default_loop_destroyed
         if self._ptr:
             self._stop_signal_checker()
-            if __SYSERR_CALLBACK == self._handle_syserr:
+            if globals()["__SYSERR_CALLBACK"] == self._handle_syserr:
                 set_syserr_cb(None)
             if libev.ev_is_default_loop(self._ptr):
                 _default_loop_destroyed = True
