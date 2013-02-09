@@ -393,7 +393,7 @@ class loop(object):
                 self._ptr = libev.ev_loop_new(c_flags)
                 if not self._ptr:
                     raise SystemError("ev_loop_new(%s) failed" % (c_flags, ))
-            if default or _SYSERR_CALLBACK is None:
+            if default or __SYSERR_CALLBACK is None:
                 set_syserr_cb(self._handle_syserr)
 
     def _stop_signal_checker(self):
@@ -410,7 +410,7 @@ class loop(object):
         global _default_loop_destroyed
         if self._ptr:
             self._stop_signal_checker()
-            if _SYSERR_CALLBACK == self._handle_syserr:
+            if __SYSERR_CALLBACK == self._handle_syserr:
                 set_syserr_cb(None)
             if libev.ev_is_default_loop(self._ptr):
                 _default_loop_destroyed = True
@@ -918,7 +918,7 @@ class callback(watcher):
 
 def _syserr_cb(msg):
     try:
-        _SYSERR_CALLBACK(msg, ffi.errno)
+        __SYSERR_CALLBACK(msg, ffi.errno)
     except:
         set_syserr_cb(None)
         print_exc = getattr(traceback, 'print_exc', None)
@@ -928,14 +928,14 @@ def _syserr_cb(msg):
 _syserr_cb._cb = ffi.callback("void(*)(char *msg)", _syserr_cb)
 
 def set_syserr_cb(callback):
-    global _SYSERR_CALLBACK
+    global __SYSERR_CALLBACK
     if callback is None:
         libev.ev_set_syserr_cb(ffi.NULL)
-        _SYSERR_CALLBACK = None
+        __SYSERR_CALLBACK = None
     elif callable(callback):
         libev.ev_set_syserr_cb(_syserr_cb._cb)
-        _SYSERR_CALLBACK = callback
+        __SYSERR_CALLBACK = callback
     else:
         raise TypeError('Expected callable or None, got %r' % (callback, ))
 
-_SYSERR_CALLBACK = None
+__SYSERR_CALLBACK = None
