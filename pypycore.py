@@ -377,7 +377,10 @@ class loop(object):
 
                 cb.callback = None
 
-                callback(*args)
+                try:
+                    callback(*args)
+                except:
+                    self.handle_error(cb, *sys.exc_info())
                 cb.args = None
 
                 # cb.callback(*(cb.args if cb.args is not None else ()))
