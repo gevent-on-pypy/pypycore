@@ -359,11 +359,43 @@ def before_block(evloop, _, revents):
 
 class loop(object):
     error_handler = None
+    def _prepare_callback(self, evloop, _, revents):
+        self._run_callbacks()
+
+    def _run_callbacks(self):
+        count = 1000
+        # libev.ev_timer_stop(self._ptr, &self._timer0)
+        while self._callbacks and count > 0:
+            callbacks = self._callbacks
+            self._callbacks = []
+            for cb in callbacks:
+                libev.ev_unref(self._ptr)
+                callback = cb.callback
+                args = cb.args
+                if callback is None or args is None:
+                    continue
+
+                cb.callback = None
+
+                callback(*args)
+                cb.args = None
+
+                # cb.callback(*(cb.args if cb.args is not None else ()))
+                # gevent_call(self, cb)
+                count -= 1
+        # if self._callbacks:
+        #     libev.ev_timer_start(self._ptr, &self._timer0)
+
     def __init__(self, flags=None, default=True, ptr=0):
         sys.stderr.write("*** using ev loop\n")
+        self._callbacks = []
         self._signal_checker = ffi.new("struct ev_prepare *")
         self._signal_checker_cb = ffi.callback("void(*)(struct evloop *, struct evprepare *, int)", before_block)
         libev.ev_prepare_init(self._signal_checker, self._signal_checker_cb)
+
+        self._prepare = ffi.new("struct ev_prepare *")
+        self._prepare_cb = ffi.callback("void(*)(struct evloop *, struct evprepare *, int)", self._prepare_callback)
+        libev.ev_prepare_init(self._prepare, self._prepare_cb)
 
 # #ifdef _WIN32
 #         libev.ev_timer_init(&self._periodic_signal_checker, <void*>gevent_periodic_signal_check, 0.3, 0.3)
@@ -395,6 +427,9 @@ class loop(object):
                     raise SystemError("ev_loop_new(%s) failed" % (c_flags, ))
             if default or globals()["__SYSERR_CALLBACK"] is None:
                 set_syserr_cb(self._handle_syserr)
+
+            libev.ev_prepare_start(self._ptr, self._prepare)
+
 
     def _stop_signal_checker(self):
         if libev.ev_is_active(self._signal_checker):
@@ -550,11 +585,11 @@ class loop(object):
     def callback(self, priority=None):
         return callback(self, priority)
 
-    def run_callback(self, func, *args, **kw):
-        priority = kw.get("priority", None)
-        result = callback(self, priority)
-        result.start(func, *args)
-        return result
+    def run_callback(self, func, *args):
+        cb = callback(func, args)
+        self._callbacks.append(cb)
+        libev.ev_ref(self._ptr)
+        return cb
 
     def _format(self):
         msg = self.backend
@@ -890,31 +925,30 @@ class child(watcher):
         #     self._flags = 4
 
 
-class callback(watcher):
-    """Pseudo-watcher used to execute a callback in the loop as soon as possible."""
-
-    # does not matter which type we actually use, since we are going
-    # to feed() events, not start watchers
-
-    libev_start_this_watcher = libev.ev_prepare_start
-    libev_stop_this_watcher = libev.ev_prepare_stop
-
-    def __init__(self, loop, ref=True, priority=None):
-        self._watcher = ffi.new("struct ev_prepare *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_prepare *, int)", self._run_callback)
-        libev.ev_prepare_init(self._watcher, self._cb)
-        watcher.__init__(self, loop, ref=ref, priority=priority)
-
-    def start(self, callback, *args):
+class callback(object):
+    def __init__(self, callback, args):
         self.callback = callback
         self.args = args
-        libev.ev_feed_event(self.loop._ptr, self._watcher, libev.EV_CUSTOM)
-        self._python_incref()
+
+    def stop(self):
+        self.callback = None
+        self.args = None
+
+    # Note, that __nonzero__ and pending are different
+    # nonzero is used in contexts where we need to know whether to schedule another callback,
+    # so it's true if it's pending or currently running
+    # 'pending' has the same meaning as libev watchers: it is cleared before entering callback
+
+    def __nonzero__(self):
+        # it's nonzero if it's pending or currently executing
+        return self.args is not None
 
     @property
-    def active(self):
+    def pending(self):
         return self.callback is not None
 
+    def _format(self):
+        return ''
 
 def _syserr_cb(msg):
     try:
