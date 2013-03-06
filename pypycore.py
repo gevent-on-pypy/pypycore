@@ -627,6 +627,7 @@ class loop(object):
 
 # #endif
 
+_refcount = {}
 
 class watcher(object):
     libev_start_this_watcher = None
@@ -674,8 +675,22 @@ class watcher(object):
 
     def _python_incref(self):
         if not self._flags & 1:
+            try:
+                _refcount[self] += 1
+            except KeyError:
+                _refcount[self] = 1
             # Py_INCREF(<PyObjectPtr>self)
             self._flags |= 1
+
+    def _python_decref(self):
+        try:
+            if _refcount[self] <= 1:
+                del _refcount[self]
+            else:
+                _refcount[self] -= 1
+        except KeyError:
+            pass
+
 
     def _get_ref(self):
         return False if self._flags & 4 else True
@@ -720,6 +735,7 @@ class watcher(object):
         self._callback = None
         self.args = None
         if self._flags & 1:
+            self._python_decref()
             # Py_DECREF(<PyObjectPtr>self)
             self._flags &= ~1
 
