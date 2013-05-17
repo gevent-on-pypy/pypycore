@@ -98,7 +98,7 @@ struct ev_child {
 };
 
 struct stat {
-    long long st_nlink;
+    short st_nlink;
     ...;
 };
 
