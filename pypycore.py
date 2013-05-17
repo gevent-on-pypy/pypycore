@@ -9,6 +9,11 @@ __all__ = ['get_version',
            'time',
            'loop']
 
+def st_nlink_type():
+    if sys.platform == "darwin":
+        return "short"
+    return "long long"
+
 
 from cffi import FFI
 ffi = FFI()
@@ -98,7 +103,7 @@ struct ev_child {
 };
 
 struct stat {
-    short st_nlink;
+    """ + st_nlink_type() + """ st_nlink;
     ...;
 };
 
