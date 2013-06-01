@@ -200,11 +200,14 @@ unsigned int ev_pending_count(struct ev_loop*);
     ev_loop* gevent_ev_default_loop(unsigned int flags)
     void gevent_install_sigchld_handler()
  */
+void gevent_noop(struct ev_loop *_loop, void *watcher, int revents);
 void ev_sleep (ev_tstamp delay); /* sleep for a while */
 """)
 
 libev = C = ffi.verify("""   // passed to the real C compiler
 #include <ev.h>
+
+void gevent_noop(struct ev_loop *_loop, void *watcher, int revents) { }
 """, libraries=["ev"])
 
 libev.vfd_open = libev.vfd_get = lambda fd: fd
@@ -369,7 +372,7 @@ class loop(object):
 
     def _run_callbacks(self):
         count = 1000
-        # libev.ev_timer_stop(self._ptr, &self._timer0)
+        libev.ev_timer_stop(self._ptr, self._timer0)
         while self._callbacks and count > 0:
             callbacks = self._callbacks
             self._callbacks = []
@@ -391,8 +394,8 @@ class loop(object):
                 # cb.callback(*(cb.args if cb.args is not None else ()))
                 # gevent_call(self, cb)
                 count -= 1
-        # if self._callbacks:
-        #     libev.ev_timer_start(self._ptr, &self._timer0)
+        if self._callbacks:
+            libev.ev_timer_start(self._ptr, self._timer0)
 
     def __init__(self, flags=None, default=True, ptr=0):
         sys.stderr.write("*** using ev loop\n")
@@ -408,6 +411,8 @@ class loop(object):
 # #ifdef _WIN32
 #         libev.ev_timer_init(&self._periodic_signal_checker, <void*>gevent_periodic_signal_check, 0.3, 0.3)
 # #endif
+        self._timer0 = ffi.new("struct ev_timer *")
+        libev.ev_timer_init(self._timer0, libev.gevent_noop, 0.0, 0.0)
 
         if ptr:
             assert ffi.typeof(ptr) is ffi.typeof("struct evloop *")
