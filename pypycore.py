@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import sys, os, traceback, signal as signalmodule
+import gevent
 
 __all__ = ['get_version',
            'get_header_version',
@@ -198,21 +199,22 @@ unsigned int ev_pending_count(struct ev_loop*);
 
 /*
     ev_loop* gevent_ev_default_loop(unsigned int flags)
-    void gevent_install_sigchld_handler()
- */
+*/
+
+void gevent_install_sigchld_handler();
 
 void (*gevent_noop)(struct ev_loop *_loop, struct ev_timer *w, int revents);
 void ev_sleep (ev_tstamp delay); /* sleep for a while */
 """)
 
 libev = C = ffi.verify("""   // passed to the real C compiler
-#include <ev.h>
+%s // Manual include of "libev.h"
 
 static void
 _gevent_noop(struct ev_loop *_loop, struct ev_timer *w, int revents) { }
 
 void (*gevent_noop)(struct ev_loop *, struct ev_timer *, int) = &_gevent_noop;
-""", libraries=["ev"])
+""" % open(os.path.join(os.path.dirname(os.path.realpath(gevent.__file__)), "libev.h"), "r").read(), libraries=["ev"])
 
 libev.vfd_open = libev.vfd_get = lambda fd: fd
 libev.vfd_free = lambda fd: None
@@ -586,13 +588,12 @@ class loop(object):
     def async(self, ref=True, priority=None):
         return async(self, ref, priority)
 
-# #if EV_CHILD_ENABLE
+    if sys.platform != "win32":
+        def child(self, pid, trace=0, ref=True):
+            return child(self, pid, trace, ref)
 
-#     def child(self, int pid, bint trace=0, ref=True):
-#         return child(self, pid, trace, ref)
-
-#     def install_sigchld(self):
-#         libev.gevent_install_sigchld_handler()
+        def install_sigchld(self):
+            libev.gevent_install_sigchld_handler()
 
 # #endif
 
