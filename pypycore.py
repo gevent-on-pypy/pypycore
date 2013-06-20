@@ -140,7 +140,7 @@ void ev_io_start(struct ev_loop*, struct ev_io*);
 void ev_io_stop(struct ev_loop*, struct ev_io*);
 void ev_feed_event(struct ev_loop*, void*, int);
 
-void ev_timer_init(struct ev_timer*, void* callback, double, double);
+void ev_timer_init(struct ev_timer*, void (*callback)(struct ev_loop *_loop, struct ev_timer *w, int revents), double, double);
 void ev_timer_start(struct ev_loop*, struct ev_timer*);
 void ev_timer_stop(struct ev_loop*, struct ev_timer*);
 void ev_timer_again(struct ev_loop*, struct ev_timer*);
@@ -200,14 +200,18 @@ unsigned int ev_pending_count(struct ev_loop*);
     ev_loop* gevent_ev_default_loop(unsigned int flags)
     void gevent_install_sigchld_handler()
  */
-void gevent_noop(struct ev_loop *_loop, void *watcher, int revents);
+
+void (*gevent_noop)(struct ev_loop *_loop, struct ev_timer *w, int revents);
 void ev_sleep (ev_tstamp delay); /* sleep for a while */
 """)
 
 libev = C = ffi.verify("""   // passed to the real C compiler
 #include <ev.h>
 
-void gevent_noop(struct ev_loop *_loop, void *watcher, int revents) { }
+static void
+_gevent_noop(struct ev_loop *_loop, struct ev_timer *w, int revents) { }
+
+void (*gevent_noop)(struct ev_loop *, struct ev_timer *, int) = &_gevent_noop;
 """, libraries=["ev"])
 
 libev.vfd_open = libev.vfd_get = lambda fd: fd
@@ -401,11 +405,11 @@ class loop(object):
         sys.stderr.write("*** using ev loop\n")
         self._callbacks = []
         self._signal_checker = ffi.new("struct ev_prepare *")
-        self._signal_checker_cb = ffi.callback("void(*)(struct evloop *, struct evprepare *, int)", before_block)
+        self._signal_checker_cb = ffi.callback("void(*)(struct ev_loop *, struct evprepare *, int)", before_block)
         libev.ev_prepare_init(self._signal_checker, self._signal_checker_cb)
 
         self._prepare = ffi.new("struct ev_prepare *")
-        self._prepare_cb = ffi.callback("void(*)(struct evloop *, struct evprepare *, int)", self._prepare_callback)
+        self._prepare_cb = ffi.callback("void(*)(struct ev_loop *, struct evprepare *, int)", self._prepare_callback)
         libev.ev_prepare_init(self._prepare, self._prepare_cb)
 
 # #ifdef _WIN32
@@ -415,7 +419,7 @@ class loop(object):
         libev.ev_timer_init(self._timer0, libev.gevent_noop, 0.0, 0.0)
 
         if ptr:
-            assert ffi.typeof(ptr) is ffi.typeof("struct evloop *")
+            assert ffi.typeof(ptr) is ffi.typeof("struct ev_loop *")
             self._ptr = ptr
         else:
             c_flags = _flags_to_int(flags)
@@ -790,7 +794,7 @@ class io(watcher):
             raise ValueError('illegal event mask: %r' % events)
 
         self._watcher = ffi.new("struct ev_io *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_io *, int)", self._run_callback)
+        self._cb = ffi.callback("void(*)(struct ev_loop *, struct ev_io *, int)", self._run_callback)
 
         libev.ev_io_init(self._watcher, self._cb, fd, events)
         watcher.__init__(self, loop, ref=ref, priority=priority)
@@ -834,7 +838,7 @@ class timer(watcher):
             raise ValueError("repeat must be positive or zero: %r" % repeat)
 
         self._watcher = ffi.new("struct ev_timer *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_timer *, int)", self._run_callback)
+        self._cb = ffi.callback("void(*)(struct ev_loop *, struct ev_timer *, int)", self._run_callback)
 
         libev.ev_timer_init(self._watcher, self._cb, after, repeat)
         watcher.__init__(self, loop, ref=ref, priority=priority)
@@ -881,7 +885,7 @@ class signal(watcher):
         #    we probably could check that in LIBEV_EMBED mode, but not in general
 
         self._watcher = ffi.new("struct ev_signal *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_signal *, int)", self._run_callback)
+        self._cb = ffi.callback("void(*)(struct ev_loop *, struct ev_signal *, int)", self._run_callback)
 
         libev.ev_signal_init(self._watcher, self._cb, signalnum)
         watcher.__init__(self, loop, ref=ref, priority=priority)
@@ -893,7 +897,7 @@ class idle(watcher):
 
     def __init__(self, loop, ref=True, priority=None):
         self._watcher = ffi.new("struct ev_idle *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_idle *, int)", self._run_callback)
+        self._cb = ffi.callback("void(*)(struct ev_loop *, struct ev_idle *, int)", self._run_callback)
         libev.ev_idle_init(self._watcher, self._cb)
         watcher.__init__(self, loop, ref=ref, priority=priority)
 
@@ -904,7 +908,7 @@ class prepare(watcher):
 
     def __init__(self, loop, ref=True, priority=None):
         self._watcher = ffi.new("struct ev_prepare *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_prepare *, int)", self._run_callback)
+        self._cb = ffi.callback("void(*)(struct ev_loop *, struct ev_prepare *, int)", self._run_callback)
         libev.ev_prepare_init(self._watcher, self._cb)
         watcher.__init__(self, loop, ref=ref, priority=priority)
 
@@ -915,7 +919,7 @@ class fork(watcher):
 
     def __init__(self, loop, ref=True, priority=None):
         self._watcher = ffi.new("struct ev_fork *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_fork *, int)", self._run_callback)
+        self._cb = ffi.callback("void(*)(struct ev_loop *, struct ev_fork *, int)", self._run_callback)
         libev.ev_fork_init(self._watcher, self._cb)
         watcher.__init__(self, loop, ref=ref, priority=priority)
 
@@ -926,7 +930,7 @@ class async(watcher):
 
     def __init__(self, loop, ref=True, priority=None):
         self._watcher = ffi.new("struct ev_async *")
-        self._cb = ffi.callback("void(*)(struct evloop *, struct ev_async *, int)", self._run_callback)
+        self._cb = ffi.callback("void(*)(struct ev_loop *, struct ev_async *, int)", self._run_callback)
         libev.ev_async_init(self._watcher, self._cb)
         watcher.__init__(self, loop, ref=ref, priority=priority)
 
