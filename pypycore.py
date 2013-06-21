@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import sys, os, traceback, signal as signalmodule
-import gevent
 
 __all__ = ['get_version',
            'get_header_version',
@@ -214,7 +213,7 @@ static void
 _gevent_noop(struct ev_loop *_loop, struct ev_timer *w, int revents) { }
 
 void (*gevent_noop)(struct ev_loop *, struct ev_timer *, int) = &_gevent_noop;
-""" % open(os.path.join(os.path.dirname(os.path.realpath(gevent.__file__)), "libev.h"), "r").read(), libraries=["ev"])
+""" % open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "libev.h"), "r").read(), libraries=["ev"])
 
 libev.vfd_open = libev.vfd_get = lambda fd: fd
 libev.vfd_free = lambda fd: None
