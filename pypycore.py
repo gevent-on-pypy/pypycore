@@ -427,10 +427,12 @@ class loop(object):
             c_flags = _flags_to_int(flags)
             _check_flags(c_flags)
             c_flags |= libev.EVFLAG_NOENV
-            if _default_loop_destroyed:
-                default = False
+            if default is None:
+                default = True
+                if _default_loop_destroyed:
+                    default = False
             if default:
-                self._ptr = libev.ev_default_loop(c_flags)  # XXX
+                self._ptr = libev.ev_default_loop(c_flags)
                 if not self._ptr:
                     raise SystemError("ev_default_loop(%s) failed" % (c_flags, ))
                 libev.ev_prepare_start(self._ptr, self._signal_checker)
@@ -942,22 +944,42 @@ class async(watcher):
     def pending(self):
         return True if libev.ev_async_pending(self._watcher) else False
 
-
 class child(watcher):
+    libev_start_this_watcher = libev.ev_child_start
+    libev_stop_this_watcher = libev.ev_child_stop
+
     def __init__(self, loop, pid, trace=0, ref=True):
         if not loop.default:
             raise TypeError('child watchers are only available on the default loop')
-        raise NotImplementedError()  # XXX too lazy at the moment
 
+        self._watcher = ffi.new("struct ev_child *")
+        self._cb = ffi.callback("void(*)(struct ev_loop*, struct ev_child *, int)", self._run_callback)
+        loop.install_sigchld()
+        libev.ev_child_init(self._watcher, self._cb, pid, trace)
+        watcher.__init__(self, loop, ref)
 
-        # libev.gevent_install_sigchld_handler()
-        # libev.ev_child_init(&self._watcher, <void *>gevent_callback_child, pid, trace)
-        # self.loop = loop
-        # if ref:
-        #     self._flags = 0
-        # else:
-        #     self._flags = 4
+    def _format(self):
+        return ' pid=%r rstatus=%r' % (self.pid, self.rstatus)
 
+    @property
+    def pid(self):
+        return self._watcher.pid
+
+    @property
+    def rpid(self, ):
+        return self._watcher.rpid
+
+    @rpid.setter
+    def rpid(self, value):
+        self._watcher.rpid = value
+
+    @property
+    def rstatus(self):
+        return self._watcher.rstatus
+
+    @rstatus.setter
+    def rstatus(self, value):
+        self._watcher.rstatus = value
 
 class callback(object):
     def __init__(self, callback, args):
