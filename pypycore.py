@@ -195,11 +195,7 @@ void ev_unref(struct ev_loop*);
 void ev_break(struct ev_loop*, int);
 unsigned int ev_pending_count(struct ev_loop*);
 
-
-/*
-    ev_loop* gevent_ev_default_loop(unsigned int flags)
-*/
-
+struct ev_loop* gevent_ev_default_loop(unsigned int flags);
 void gevent_install_sigchld_handler();
 
 void (*gevent_noop)(struct ev_loop *_loop, struct ev_timer *w, int revents);
@@ -382,7 +378,7 @@ class loop(object):
             callbacks = self._callbacks
             self._callbacks = []
             for cb in callbacks:
-                libev.ev_unref(self._ptr)
+                self.unref()
                 callback = cb.callback
                 args = cb.args
                 if callback is None or args is None:
@@ -431,15 +427,13 @@ class loop(object):
                 if _default_loop_destroyed:
                     default = False
             if default:
-                self._ptr = libev.ev_default_loop(c_flags)
+                self._ptr = libev.gevent_ev_default_loop(c_flags)
                 if not self._ptr:
                     raise SystemError("ev_default_loop(%s) failed" % (c_flags, ))
-                libev.ev_prepare_start(self._ptr, self._signal_checker)
-                libev.ev_unref(self._ptr)
 
                 # if sys.platform == "win32":
                 #     libev.ev_timer_start(self._ptr, &self._periodic_signal_checker)
-                #     libev.ev_unref(self._ptr)
+                #     self.unref()
 
             else:
                 self._ptr = libev.ev_loop_new(c_flags)
@@ -447,13 +441,12 @@ class loop(object):
                     raise SystemError("ev_loop_new(%s) failed" % (c_flags, ))
             if default or globals()["__SYSERR_CALLBACK"] is None:
                 set_syserr_cb(self._handle_syserr)
-
             libev.ev_prepare_start(self._ptr, self._prepare)
-
+            self.unref()
 
     def _stop_signal_checker(self):
         if libev.ev_is_active(self._signal_checker):
-            libev.ev_ref(self._ptr)
+            self.ref()
             libev.ev_prepare_stop(self._ptr, self._signal_checker)
 # #ifdef _WIN32
 #         if libev.ev_is_active(&self._periodic_signal_checker):
@@ -607,7 +600,7 @@ class loop(object):
     def run_callback(self, func, *args):
         cb = callback(func, args)
         self._callbacks.append(cb)
-        libev.ev_ref(self._ptr)
+        self.ref()
         return cb
 
     def _format(self):
@@ -686,7 +679,7 @@ class watcher(object):
 
     def _libev_unref(self):
         if self._flags & 6 == 4:
-            libev.ev_unref(self.loop._ptr)
+            self.loop.unref()
             self._flags |= 2
 
     def _python_incref(self):
@@ -716,14 +709,14 @@ class watcher(object):
             if not self._flags & 4:
                 return  # ref is already True
             if self._flags & 2:  # ev_unref was called, undo
-                libev.ev_ref(self.loop._ptr)
+                self.loop.ref()
             self._flags &= ~6  # do not want unref, no outstanding unref
         else:
             if self._flags & 4:
                 return  # ref is already False
             self._flags |= 4
             if not self._flags & 2 and libev.ev_is_active(self._watcher):
-                libev.ev_unref(self.loop._ptr)
+                self.loop.unref()
                 self._flags |= 2
 
     ref = property(_get_ref, _set_ref)
@@ -745,7 +738,7 @@ class watcher(object):
 
     def stop(self):
         if self._flags & 2:
-            libev.ev_ref(self.loop._ptr)
+            self.loop.ref()
             self._flags &= ~2
         self.libev_stop_this_watcher(self.loop._ptr, self._watcher)
         self._callback = None
@@ -769,7 +762,7 @@ class watcher(object):
         self.callback = callback
         self.args = args
         if self._flags & 6 == 4:
-            libev.ev_unref(self.loop._ptr)
+            self.loop.unref()
             self._flags |= 2
         libev.ev_feed_event(self.loop._ptr, self._watcher, revents)
         if not self._flags & 1:
