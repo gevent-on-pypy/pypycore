@@ -1,0 +1,25 @@
+# CPython + pypycore
+19/118 tests failed in 08:17
+
+3/118 expected failures
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test --Event test_ssl.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test test_ssl.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__socket_dns.py
+
+16/118 unexpected failures
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test___example_servers.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test --Event test_socket.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__pywsgi.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test --Event test_httpservers.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test_close_backend_fd.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test test_httpservers.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__socket.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__pool.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__subprocess_interrupted.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__examples.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test test_socket.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test_threading_2.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__socket_ssl.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__all__.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__core_stat.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/c_venv/bin/python -u test__destroy.py

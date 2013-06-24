@@ -1,0 +1,67 @@
+# PyPy + pypycore
+61/118 tests failed in 31:14
+
+2/118 expected failures
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_ssl.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_ssl.py
+
+59/118 unexpected failures
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_subprocess.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__examples.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__core_async.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__pool.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__backdoor.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_socketserver.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_socket.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__core.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test_hub_join_timeout.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_threading.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__subprocess_interrupted.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__all__.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__loop_callback.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__threading_vs_settrace.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__core_watcher.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test_threading_2.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_httplib.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__nondefaultloop.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__core_timer.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__server_pywsgi.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__greenio.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__core_loop_run.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_httpservers.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_asyncore.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__greenletset.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__example_portforwarder.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__greenlet.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_ftplib.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__destroy.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__ssl.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test_ares_timeout.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__subprocess.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_ftplib.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_telnetlib.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__execmodules.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__threadpool.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_subprocess.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__GreenletExit.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__api_timeout.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_httpservers.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__pywsgi.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_threading_local.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__socket_ssl.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test_close_backend_fd.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_signal.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test___example_servers.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_threading_local.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__ares_host_result.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__core_stat.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_threading.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__exc_info.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__socket.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__refcount.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__fileobject.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_socket.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u test__server.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_telnetlib.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test test_socketserver.py
+ - GEVENT_LOOP=pypycore.loop /home/vella/src/gevent/py_venv/bin/python -u -m monkey_test --Event test_httplib.py
