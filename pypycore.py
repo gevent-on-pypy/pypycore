@@ -202,6 +202,8 @@ void (*gevent_noop)(struct ev_loop *_loop, struct ev_timer *w, int revents);
 void ev_sleep (ev_tstamp delay); /* sleep for a while */
 """)
 
+
+include_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'gevent')
 libev = C = ffi.verify("""   // passed to the real C compiler
 #include "libev.h"
 
@@ -209,7 +211,8 @@ static void
 _gevent_noop(struct ev_loop *_loop, struct ev_timer *w, int revents) { }
 
 void (*gevent_noop)(struct ev_loop *, struct ev_timer *, int) = &_gevent_noop;
-""", include_dirs=[os.path.dirname(os.path.realpath(__file__))], libraries=["ev"])
+""", include_dirs=[include_dir], libraries=["ev"])
+del include_dir
 
 libev.vfd_open = libev.vfd_get = lambda fd: fd
 libev.vfd_free = lambda fd: None
