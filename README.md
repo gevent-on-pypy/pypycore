@@ -7,7 +7,5 @@ Installation
 ============
 	pip install git+git://github.com/schmir/gevent@pypy-hacks
 	pip install cffi
-	git clone https://github.com/schmir/pypycore.git pypycore
-	cd pypycore
-	CFLAGS=-O2 pip install -e .
+	pip install git+git://github.com/gevent-on-pypy/pypycore
 	export GEVENT_LOOP=pypycore.loop
