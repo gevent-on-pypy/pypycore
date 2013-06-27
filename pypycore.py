@@ -71,7 +71,11 @@ ffi.cdef("""
 #define EVBREAK_ONE ...
 #define EVBREAK_ALL ...
 
-struct ev_loop;
+struct ev_loop {    
+    int backend_fd;
+    ...;
+};
+
 struct ev_io {
     int fd;
     int events;
@@ -205,7 +209,17 @@ void ev_sleep (ev_tstamp delay); /* sleep for a while */
 
 include_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'gevent')
 libev = C = ffi.verify("""   // passed to the real C compiler
+#include <ev.h>
 #include "libev.h"
+
+// Taken from 'libev.pxd'
+struct ev_loop{
+    int activecnt;
+    int sig_pending;
+    int backend_fd;
+    int sigfd;
+    unsigned int origflags;
+};
 
 static void
 _gevent_noop(struct ev_loop *_loop, struct ev_timer *w, int revents) { }
@@ -401,7 +415,7 @@ class loop(object):
         if self._callbacks:
             libev.ev_timer_start(self._ptr, self._timer0)
 
-    def __init__(self, flags=None, default=True, ptr=0):
+    def __init__(self, flags=None, default=None, ptr=0):
         sys.stderr.write("*** using ev loop\n")
         self._callbacks = []
         self._signal_checker = ffi.new("struct ev_prepare *")
