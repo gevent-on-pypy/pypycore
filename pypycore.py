@@ -71,11 +71,7 @@ ffi.cdef("""
 #define EVBREAK_ONE ...
 #define EVBREAK_ALL ...
 
-struct ev_loop {    
-    int backend_fd;
-    ...;
-};
-
+struct ev_loop;
 struct ev_io {
     int fd;
     int events;
@@ -211,15 +207,6 @@ include_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'gevent')
 libev = C = ffi.verify("""   // passed to the real C compiler
 #include <ev.h>
 #include "libev.h"
-
-// Taken from 'libev.pxd'
-struct ev_loop{
-    int activecnt;
-    int sig_pending;
-    int backend_fd;
-    int sigfd;
-    unsigned int origflags;
-};
 
 static void
 _gevent_noop(struct ev_loop *_loop, struct ev_timer *w, int revents) { }
@@ -630,27 +617,32 @@ class loop(object):
 # #endif
         return msg
 
-    def fileno(self):
-        fd = self._ptr.backend_fd
-        if fd >= 0:
-            return fd
-
-#     LOOP_PROPERTY(activecnt)
-
+# #ifdef LIBEV_EMBED
+#    def fileno(self):
+#        fd = self._ptr.backend_fd
+#        if fd >= 0:
+#            return fd
+#
+#    LOOP_PROPERTY(activecnt)
+#
+#    LOOP_PROPERTY(sig_pending)
+#
 # #if EV_USE_SIGNALFD
-#     LOOP_PROPERTY(sigfd)
+#    LOOP_PROPERTY(sigfd)
 # #endif
-
-#     property origflags:
-
-#         def __get__(self):
-#             return _flags_to_list(self._ptr.origflags)
-
-#     property origflags_int:
-
-#         def __get__(self):
-#             return self._ptr.origflags
-
+#
+#    property origflags:
+#
+#        def __get__(self):
+#            CHECK_LOOP3(self)
+#            return _flags_to_list(self._ptr.origflags)
+#
+#    property origflags_int:
+#
+#        def __get__(self):
+#            CHECK_LOOP3(self)
+#            return self._ptr.origflags
+#
 # #endif
 
 _refcount = {}
@@ -1038,3 +1030,18 @@ def set_syserr_cb(callback):
         raise TypeError('Expected callable or None, got %r' % (callback, ))
 
 __SYSERR_CALLBACK = None
+
+# #ifdef LIBEV_EMBED
+# LIBEV_EMBED = True
+# EV_USE_FLOOR = libev.EV_USE_FLOOR
+# EV_USE_CLOCK_SYSCALL = libev.EV_USE_CLOCK_SYSCALL
+# EV_USE_REALTIME = libev.EV_USE_REALTIME
+# EV_USE_MONOTONIC = libev.EV_USE_MONOTONIC
+# EV_USE_NANOSLEEP = libev.EV_USE_NANOSLEEP
+# EV_USE_INOTIFY = libev.EV_USE_INOTIFY
+# EV_USE_SIGNALFD = libev.EV_USE_SIGNALFD
+# EV_USE_EVENTFD = libev.EV_USE_EVENTFD
+# EV_USE_4HEAP = libev.EV_USE_4HEAP
+# #else
+LIBEV_EMBED = False
+# #endif
