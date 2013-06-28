@@ -1,17 +1,19 @@
-# Original core on CPython
-11/118 tests failed in 07:28
+# Original core on CPython, with linked libev (NOT embeded).
+13/118 tests failed in 05:40
 
 3/118 expected failures
  - /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test --Event test_ssl.py
  - /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test test_ssl.py
  - /home/vella/src/gevent/c_venv/bin/python -u test__socket_dns.py
 
-8/118 unexpected failures
+10/118 unexpected failures
  - /home/vella/src/gevent/c_venv/bin/python -u test___example_servers.py
+ - /home/vella/src/gevent/c_venv/bin/python -u test_close_backend_fd.py
  - /home/vella/src/gevent/c_venv/bin/python -u test__all__.py
  - /home/vella/src/gevent/c_venv/bin/python -u test__socket_ssl.py
  - /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test test_httpservers.py
  - /home/vella/src/gevent/c_venv/bin/python -u test__pywsgi.py
  - /home/vella/src/gevent/c_venv/bin/python -u test__socket.py
  - /home/vella/src/gevent/c_venv/bin/python -u -m monkey_test --Event test_httpservers.py
+ - /home/vella/src/gevent/c_venv/bin/python -u test__destroy.py
  - /home/vella/src/gevent/c_venv/bin/python -u test__examples.py
