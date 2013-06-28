@@ -403,7 +403,6 @@ class loop(object):
             libev.ev_timer_start(self._ptr, self._timer0)
 
     def __init__(self, flags=None, default=None, ptr=0):
-        sys.stderr.write("*** using ev loop\n")
         self._callbacks = []
         self._signal_checker = ffi.new("struct ev_prepare *")
         self._signal_checker_cb = ffi.callback("void(*)(struct ev_loop *, struct evprepare *, int)", before_block)
