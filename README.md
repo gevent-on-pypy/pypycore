@@ -1,3 +1,6 @@
+This has been merged into gevent in https://github.com/surfly/gevent/pull/434
+-----------------------------------------------------------------------------
+
 pypycore
 ========
 
